@@ -11,8 +11,8 @@ pipeline {
         NEXUS_PASS = 'Dazz123'
         RELEASE_REPO = 'mb-release'
         CENTRAL_REPO = 'mb-maven-central'
-        NEXUS_IP = '172.31.11.68' //private ip since in the same network
-        NEXUS_PORT = '8081'
+        NEXUSIP = '172.31.11.68' //private ip since in the same network
+        NEXUSPORT = '8081'
         NEXUS_GRP_REPO = 'mb-maven-group'
         NEXUS_LOGIN = 'nexuslogin'
     }
