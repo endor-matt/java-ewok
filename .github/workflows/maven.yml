@@ -50,4 +50,5 @@ jobs:
           enable_github_action_token: "false"
           scan_summary_output_type: "table"
           ci_run: "false"
+          
     
