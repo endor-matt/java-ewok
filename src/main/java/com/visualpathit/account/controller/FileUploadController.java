@@ -3,6 +3,7 @@ package com.visualpathit.account.controller;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -38,21 +39,31 @@ public class FileUploadController {
 	String uploadFileHandler(@RequestParam("name") String name,@RequestParam("userName") String userName,
 			@RequestParam("file") MultipartFile file) {
 		
-		System.out.println("Called the upload file :::" );
+		logger.info("Called the upload file");
 		if (!file.isEmpty()) {
 			try {
+				// Reject names containing path separators or traversal sequences to
+				// prevent writing outside the intended upload directory.
+				if (name == null || name.isEmpty() || name.contains("/") || name.contains("\\")
+						|| name.contains("..") || !name.matches("[A-Za-z0-9_\\-]+")) {
+					return "Upload rejected: invalid file name.";
+				}
+
 				byte[] bytes = file.getBytes();
 
 				// Creating the directory to store file
 				String rootPath = System.getProperty("catalina.home");
-				System.out.println("Path ::::" +rootPath);
 				File dir = new File(rootPath + File.separator + "tmpFiles");
 				if (!dir.exists())
 					dir.mkdirs();
 
-				// Create the file on server
-				File serverFile = new File(dir.getAbsolutePath()
-						+ File.separator + name+".png");
+				// Canonicalize the target path and confirm it stays inside the upload directory.
+				File serverFile = new File(dir.getAbsolutePath() + File.separator + name + ".png");
+				Path canonicalDir = dir.toPath().toRealPath();
+				Path canonicalFile = serverFile.getCanonicalFile().toPath();
+				if (!canonicalFile.startsWith(canonicalDir)) {
+					return "Upload rejected: path traversal detected.";
+				}
 				//image saving 
 				User user = userService.findByUsername(userName);
 				user.setProfileImg(name +".png");
